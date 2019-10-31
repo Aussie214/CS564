@@ -1,0 +1,24 @@
+SELECT sup_nat.N_NAME, sup_nat.Order_Size
+
+/* Nested Query returns table of all line items from within nation, then we group by nation to get total nation order size */
+FROM (SELECT sup_nat.N_NAME, sup_nat.N_NATIONKEY, SUM(LINEITEM.L_QUANTITY * (LINEITEM.L_EXTENDEDPRICE - LINEITEM.L_DISCOUNT)) AS Order_Size
+FROM LINEITEM, ORDERS, NATION AS sup_nat, NATION AS cust_nat, CUSTOMER, SUPPLIER
+WHERE
+LINEITEM.L_SUPPKEY = SUPPLIER.S_SUPPKEY
+AND
+SUPPLIER.S_NATIONKEY = sup_nat.N_NATIONKEY
+AND
+LINEITEM.L_ORDERKEY = ORDERS.O_ORDERKEY
+AND
+ORDERS.O_CUSTKEY = CUSTOMER.C_CUSTKEY
+AND
+CUSTOMER.C_NATIONKEY = cust_nat.N_NATIONKEY
+AND
+sup_nat.N_NATIONKEY = cust_nat.N_NATIONKEY
+GROUP BY sup_nat.N_NATIONKEY
+) AS sup_nat
+
+GROUP BY sup_nat.N_NATIONKEY
+ORDER BY sup_nat.N_NAME;
+
+/* 9074262305
